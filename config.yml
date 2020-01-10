@@ -1,0 +1,20 @@
+output_dir: '/data/benchmark/compression'
+
+benchmark:
+  num_threads: 32
+  num_times: 10
+
+# kaggle datasets to benchmark
+datasets:
+  itraq:
+    id: 'piotrgrabo/breastcancerproteomes'
+    file: '77_cancer_proteomes_CPTAC_itraq.csv'
+  golub1999:
+    id: 'crawford/gene-expression'
+    file: 'data_set_ALL_AML_train.csv'
+  pancan:
+    id: 'murats/gene-expression-cancer-rnaseq'
+    file: 'data.csv'
+  yeast:
+    id: 'costalaether/yeast-transcriptomics'
+    file: 'SC_expression.csv'

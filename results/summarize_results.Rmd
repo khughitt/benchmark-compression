@@ -1,0 +1,90 @@
+---
+title: "R/Python Data Compression Benchmark Results Summary"
+date: "`r strftime(Sys.time(), '%Y-%m-%d')`"
+output: github_document
+---
+
+```{r, message = FALSE}
+library(tidyverse)
+library(knitr)
+
+opts_chunk$set(fig.width = 5.626, fig.height = 4.25, dpi = 192)
+```
+
+# Overview
+
+```{r}
+res <- read_csv('/data/benchmark/compression/timings/all_timings.csv', col_types = cols())
+
+# drop the "Language" and "Method" columns for now since everything is just using pandas..
+res <- res %>%
+  select(-Language, -Method)
+
+# add a more useful "Method" column and reorder columns
+res <- res %>%
+  mutate(Method = sprintf("%s (%s)", Library, Compression)) %>%
+  select(Dataset, Method, everything()) %>%
+  select(-Library, -Compression)
+
+# finally, let's add a fields representing the average compression ratio, and the
+# compression ratio to average i/o ratio
+data_sizes <- res %>%
+  filter(Method == 'pandas (none)') %>%
+  select(dataset=Dataset, size=`File Size (MB)`)
+
+res$natural_size <- data_sizes$size[match(res$Dataset, data_sizes$dataset)]
+
+res <- res %>%
+  mutate(`Compression Ratio` = natural_size / `File Size (MB)`) %>%
+  mutate(`Compression to I/O Ratio` = `Compression Ratio` / (0.5 * (`Read Time (Secs)` + `Write Time (Secs)`)))
+
+knitr::kable(res, digits = 2)
+```
+
+# Read Time (seconds)
+
+```{r read_time}
+ggplot(res, aes(x = Method, y = `Read Time (Secs)`, fill = Method)) +
+  geom_bar(stat = 'identity') + 
+  facet_wrap(~Dataset, scales = 'free_y') +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  ggtitle("Read Time (Lower is Better)") +
+  ylab("Time (seconds)")
+```
+
+# Write Time (seconds)
+
+```{r write_time}
+ggplot(res, aes(x = Method, y = `Write Time (Secs)`, fill = Method)) +
+  geom_bar(stat = 'identity') + 
+  facet_wrap(~Dataset, scales = 'free_y') +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  ggtitle("Write Time (Lower is Better)") +
+  ylab("Time (seconds)")
+```
+
+# Filesize (MB)
+
+```{r file_size}
+ggplot(res, aes(x = Method, y = `File Size (MB)`, fill = Method)) +
+  geom_bar(stat = 'identity') + 
+  facet_wrap(~Dataset, scales = 'free_y') +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  ggtitle("File Size (Lower is Better)") +
+  ylab("Size (MB)")
+```
+
+# Compression to Average I/O Speed Ratio
+
+```{r compression_to_speed_ratio}
+ggplot(res, aes(x = Method, y = `Compression to I/O Ratio`, fill = Method)) +
+  geom_bar(stat = 'identity') + 
+  facet_wrap(~Dataset, scales = 'free_y') +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90)) +
+  ggtitle("Compression to Average I/O Speed Ratio (Higher is Better)") +
+  ylab("Compression to Average I/O Speed Ratio")
+```

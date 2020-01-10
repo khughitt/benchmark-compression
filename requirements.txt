@@ -1,0 +1,16 @@
+conda-forge::r-base>=3.6
+bioconductor-rhdf5
+fastparquet
+feather-format
+hdf5
+kaggle
+lz4
+numpy
+r-arrow
+r-feather
+r-microbenchmark
+r-tidyverse
+pandas
+snakemake-minimal
+snappy
+zstandard
