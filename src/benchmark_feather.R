@@ -10,7 +10,7 @@ df <- read_csv(snakemake@input[[1]], col_types = cols())
 
 # benchmark write performance
 write_times <- microbenchmark(
-  write_feather(df, snakemake@output[['data']])
+  write_feather(df, snakemake@output[['data']]),
   times = snakemake@config$benchmark$num_times
 )
 min_write_time <- min(write_times$time) / 1e9

@@ -20,6 +20,8 @@ rule combine_timings:
         expand(os.path.join(out_dir, 'timings', '{dataset}', 'pandas_parquet_pyarrow_snappy.csv'), dataset=config['datasets']),
         expand(os.path.join(out_dir, 'timings', '{dataset}', 'pandas_parquet_pyarrow_zstd.csv'), dataset=config['datasets']),
         expand(os.path.join(out_dir, 'timings', '{dataset}', 'pandas_parquet_fastparquet_zstd.csv'), dataset=config['datasets']),
+        expand(os.path.join(out_dir, 'timings', '{dataset}', 'readr_csv_uncompressed.csv'), dataset=config['datasets']),
+        expand(os.path.join(out_dir, 'timings', '{dataset}', 'readr_csv_gzip.csv'), dataset=config['datasets']),
         expand(os.path.join(out_dir, 'timings', '{dataset}', 'r_feather.csv'), dataset=config['datasets']),
     output: 
         os.path.join(out_dir, 'timings', 'all_timings.csv')
@@ -104,6 +106,22 @@ rule benchmark_r_feather:
         timings=os.path.join(out_dir, 'timings', '{dataset}', 'r_feather.csv')
     threads: config['benchmark']['num_threads']
     script: 'src/benchmark_feather.R'
+
+rule benchmark_readr_uncompressed_csv:
+    input: os.path.join(out_dir, 'datasets', '{dataset}.csv'),
+    output:
+        data=os.path.join(out_dir, 'output', '{dataset}', 'readr_csv_uncompressed.csv'),
+        timings=os.path.join(out_dir, 'timings', '{dataset}', 'readr_csv_uncompressed.csv')
+    threads: config['benchmark']['num_threads']
+    script: 'src/benchmark_readr_csv.R'
+
+rule benchmark_readr_compressed_csv:
+    input: os.path.join(out_dir, 'datasets', '{dataset}.csv'),
+    output:
+        data=os.path.join(out_dir, 'output', '{dataset}', 'readr_csv_gzip.csv.gz'),
+        timings=os.path.join(out_dir, 'timings', '{dataset}', 'readr_csv_gzip.csv')
+    threads: config['benchmark']['num_threads']
+    script: 'src/benchmark_readr_csv.R'
 
 rule benchmark_pandas_uncompressed_csv:
     input: os.path.join(out_dir, 'datasets', '{dataset}.csv'),
