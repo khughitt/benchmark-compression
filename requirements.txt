@@ -11,6 +11,7 @@ r-feather
 r-microbenchmark
 r-tidyverse
 pandas
+pyarrow
 snakemake-minimal
 snappy
 zstandard
