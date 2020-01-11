@@ -41,58 +41,83 @@ res <- res %>%
   mutate(`Compression Ratio` = natural_size / `File Size (MB)`) %>%
   mutate(`Compression to I/O Ratio` = `Compression Ratio` / (0.5 * (`Read Time (Secs)` + `Write Time (Secs)`)))
 
-res %>%
-  select(-Library, -Compression) %>%
-  kable(digits = 2)
-
 # include original dataset sizes in plot sub-headers
-res$Dataset <- sprintf("%s (%0.1f MB)", res$Dataset, res$natural_size)
+label <- sprintf("%s (%0.1f MB)", res$Dataset, res$natural_size)
+
+mask <- res$natural_size < 1
+label[mask] <- sprintf("%s (%0.1f KB)", res$Dataset[mask], res$natural_size[mask] * 1e3)
+
+res$Dataset <- label
+
+# split datasets into groups of 4 when plotting
+datasets <- unique(res$Dataset)
+datasets_list <- split(datasets, ceiling(seq_along(datasets) / 4))
 ```
 
 # Read Time (seconds)
 
 ```{r read_time}
-ggplot(res, aes(x = Method, y = `Read Time (Secs)`, fill = `File Format`)) +
-  geom_bar(stat = 'identity') + 
-  facet_wrap(~Dataset, scales = 'free_y') +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90)) +
-  ggtitle("Read Time (Lower is Better)") +
-  ylab("Time (seconds)")
+for (dataset_subset in datasets_list) {
+  res_subset <- res %>%
+    filter(Dataset %in% dataset_subset)
+
+  print(ggplot(res_subset, aes(x = Method, y = `Read Time (Secs)`, fill = `File Format`)) +
+    geom_bar(stat = 'identity') + 
+    facet_wrap(~Dataset, scales = 'free_y') +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90)) +
+    ggtitle("Read Time (Lower is Better)") +
+    ylab("Time (seconds)"))
+}
 ```
 
 # Write Time (seconds)
 
 ```{r write_time}
-ggplot(res, aes(x = Method, y = `Write Time (Secs)`, fill = `File Format`)) +
-  geom_bar(stat = 'identity') + 
-  facet_wrap(~Dataset, scales = 'free_y') +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90)) +
-  ggtitle("Write Time (Lower is Better)") +
-  ylab("Time (seconds)")
+for (dataset_subset in datasets_list) {
+  res_subset <- res %>%
+    filter(Dataset %in% dataset_subset)
+
+  print(ggplot(res_subset, aes(x = Method, y = `Write Time (Secs)`, fill = `File Format`)) +
+    geom_bar(stat = 'identity') + 
+    facet_wrap(~Dataset, scales = 'free_y') +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90)) +
+    ggtitle("Write Time (Lower is Better)") +
+    ylab("Time (seconds)"))
+}
 ```
 
 # Filesize (MB)
 
 ```{r file_size}
-ggplot(res, aes(x = Method, y = `File Size (MB)`, fill = `File Format`)) +
-  geom_bar(stat = 'identity') + 
-  facet_wrap(~Dataset, scales = 'free_y') +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90)) +
-  ggtitle("File Size (Lower is Better)") +
-  ylab("Size (MB)")
+for (dataset_subset in datasets_list) {
+  res_subset <- res %>%
+    filter(Dataset %in% dataset_subset)
+
+  print(ggplot(res_subset, aes(x = Method, y = `File Size (MB)`, fill = `File Format`)) +
+    geom_bar(stat = 'identity') + 
+    facet_wrap(~Dataset, scales = 'free_y') +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90)) +
+    ggtitle("File Size (Lower is Better)") +
+    ylab("Size (MB)"))
+}
 ```
 
 # Compression to Average I/O Speed Ratio
 
 ```{r compression_to_speed_ratio}
-ggplot(res, aes(x = Method, y = `Compression to I/O Ratio`, fill = `File Format`)) +
-  geom_bar(stat = 'identity') + 
-  facet_wrap(~Dataset, scales = 'free_y') +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90)) +
-  ggtitle("Compression to Average I/O Speed Ratio (Higher is Better)") +
-  ylab("Compression to Average I/O Speed Ratio")
+for (dataset_subset in datasets_list) {
+  res_subset <- res %>%
+    filter(Dataset %in% dataset_subset)
+
+  print(ggplot(res_subset, aes(x = Method, y = `Compression to I/O Ratio`, fill = `File Format`)) +
+    geom_bar(stat = 'identity') + 
+    facet_wrap(~Dataset, scales = 'free_y') +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90)) +
+    ggtitle("Compression to Average I/O Speed Ratio (Higher is Better)") +
+    ylab("Compression to Average I/O Speed Ratio"))
+}
 ```

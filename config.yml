@@ -18,3 +18,15 @@ datasets:
   yeast:
     id: 'costalaether/yeast-transcriptomics'
     file: 'SC_expression.csv'
+  heart_disease_uci:
+    id: 'ronitf/heart-disease-uci'
+    file: 'heart.csv'
+  creditcardfraud:
+    id: 'mlg-ulb/creditcardfraud'
+    file: 'creditcard.csv'
+  tmdb_movie_metadata:
+    id: 'tmdb/tmdb-movie-metadata'
+    file: 'tmdb_5000_movies.csv'
+  worldbank_dev_ind:
+    id: 'worldbank/world-development-indicators'
+    file: 'Indicators.csv'

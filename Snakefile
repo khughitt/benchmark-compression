@@ -38,7 +38,7 @@ rule combine_timings:
         dat.to_csv(output[0], index=False)
 
 rule benchmark_parquet_pyarrow_lz4:
-    input: os.path.join(out_dir, 'datasets', '{dataset}.csv'),
+    input: os.path.join(out_dir, 'datasets', '{dataset}.csv')
     output:
         data=os.path.join(out_dir, 'output', '{dataset}', 'pyarrow_lz4.parquet'),
         timings=os.path.join(out_dir, 'timings', '{dataset}', 'pandas_parquet_pyarrow_lz4.csv')
@@ -49,7 +49,7 @@ rule benchmark_parquet_pyarrow_lz4:
     script: 'src/benchmark_parquet.py'
 
 rule benchmark_parquet_fastparquet_lz4:
-    input: os.path.join(out_dir, 'datasets', '{dataset}.csv'),
+    input: os.path.join(out_dir, 'datasets', '{dataset}.csv')
     output:
         data=os.path.join(out_dir, 'output', '{dataset}', 'fastparquet_lz4.parquet'),
         timings=os.path.join(out_dir, 'timings', '{dataset}', 'pandas_parquet_fastparquet_lz4.csv')
@@ -60,7 +60,7 @@ rule benchmark_parquet_fastparquet_lz4:
     script: 'src/benchmark_parquet.py'
 
 rule benchmark_parquet_pyarrow_snappy:
-    input: os.path.join(out_dir, 'datasets', '{dataset}.csv'),
+    input: os.path.join(out_dir, 'datasets', '{dataset}.csv')
     output:
         data=os.path.join(out_dir, 'output', '{dataset}', 'pyarrow_snappy.parquet'),
         timings=os.path.join(out_dir, 'timings', '{dataset}', 'pandas_parquet_pyarrow_snappy.csv')
@@ -71,7 +71,7 @@ rule benchmark_parquet_pyarrow_snappy:
     script: 'src/benchmark_parquet.py'
 
 rule benchmark_parquet_pyarrow_zstd:
-    input: os.path.join(out_dir, 'datasets', '{dataset}.csv'),
+    input: os.path.join(out_dir, 'datasets', '{dataset}.csv')
     output:
         data=os.path.join(out_dir, 'output', '{dataset}', 'pyarrow_zstd.parquet'),
         timings=os.path.join(out_dir, 'timings', '{dataset}', 'pandas_parquet_pyarrow_zstd.csv')
@@ -82,7 +82,7 @@ rule benchmark_parquet_pyarrow_zstd:
     script: 'src/benchmark_parquet.py'
 
 rule benchmark_parquet_fastparquet_zstd:
-    input: os.path.join(out_dir, 'datasets', '{dataset}.csv'),
+    input: os.path.join(out_dir, 'datasets', '{dataset}.csv')
     output:
         data=os.path.join(out_dir, 'output', '{dataset}', 'fastparquet_zstd.parquet'),
         timings=os.path.join(out_dir, 'timings', '{dataset}', 'pandas_parquet_fastparquet_zstd.csv')
@@ -93,7 +93,7 @@ rule benchmark_parquet_fastparquet_zstd:
     script: 'src/benchmark_parquet.py'
 
 rule benchmark_pandas_feather:
-    input: os.path.join(out_dir, 'datasets', '{dataset}.csv'),
+    input: os.path.join(out_dir, 'datasets', '{dataset}.csv')
     output:
         data=os.path.join(out_dir, 'output', '{dataset}', 'pandas.feather'),
         timings=os.path.join(out_dir, 'timings', '{dataset}', 'pandas_feather.csv')
@@ -101,7 +101,7 @@ rule benchmark_pandas_feather:
     script: 'src/benchmark_feather.py'
 
 rule benchmark_r_feather:
-    input: os.path.join(out_dir, 'datasets', '{dataset}.csv'),
+    input: os.path.join(out_dir, 'datasets', '{dataset}.csv')
     output:
         data=os.path.join(out_dir, 'output', '{dataset}', 'r.feather'),
         timings=os.path.join(out_dir, 'timings', '{dataset}', 'r_feather.csv')
@@ -109,7 +109,7 @@ rule benchmark_r_feather:
     script: 'src/benchmark_feather.R'
 
 rule benchmark_r_parquet:
-    input: os.path.join(out_dir, 'datasets', '{dataset}.csv'),
+    input: os.path.join(out_dir, 'datasets', '{dataset}.csv')
     output:
         data=os.path.join(out_dir, 'output', '{dataset}', 'r.parquet'),
         timings=os.path.join(out_dir, 'timings', '{dataset}', 'r_parquet.csv')
@@ -117,7 +117,7 @@ rule benchmark_r_parquet:
     script: 'src/benchmark_parquet.R'
 
 rule benchmark_readr_uncompressed_csv:
-    input: os.path.join(out_dir, 'datasets', '{dataset}.csv'),
+    input: os.path.join(out_dir, 'datasets', '{dataset}.csv')
     output:
         data=os.path.join(out_dir, 'output', '{dataset}', 'readr_csv_uncompressed.csv'),
         timings=os.path.join(out_dir, 'timings', '{dataset}', 'readr_csv_uncompressed.csv')
@@ -125,7 +125,7 @@ rule benchmark_readr_uncompressed_csv:
     script: 'src/benchmark_readr_csv.R'
 
 rule benchmark_readr_compressed_csv:
-    input: os.path.join(out_dir, 'datasets', '{dataset}.csv'),
+    input: os.path.join(out_dir, 'datasets', '{dataset}.csv')
     output:
         data=os.path.join(out_dir, 'output', '{dataset}', 'readr_csv_gzip.csv.gz'),
         timings=os.path.join(out_dir, 'timings', '{dataset}', 'readr_csv_gzip.csv')
@@ -133,7 +133,7 @@ rule benchmark_readr_compressed_csv:
     script: 'src/benchmark_readr_csv.R'
 
 rule benchmark_pandas_uncompressed_csv:
-    input: os.path.join(out_dir, 'datasets', '{dataset}.csv'),
+    input: os.path.join(out_dir, 'datasets', '{dataset}.csv')
     output:
         data=os.path.join(out_dir, 'output', '{dataset}', 'pandas_csv_uncompressed.csv'),
         timings=os.path.join(out_dir, 'timings', '{dataset}', 'pandas_csv_uncompressed.csv')
@@ -141,7 +141,7 @@ rule benchmark_pandas_uncompressed_csv:
     script: 'src/benchmark_pandas_csv.py'
 
 rule benchmark_pandas_compressed_csv:
-    input: os.path.join(out_dir, 'datasets', '{dataset}.csv'),
+    input: os.path.join(out_dir, 'datasets', '{dataset}.csv')
     output:
         data=os.path.join(out_dir, 'output', '{dataset}', 'pandas_csv_gzip.csv.gz'),
         timings=os.path.join(out_dir, 'timings', '{dataset}', 'pandas_csv_gzip.csv')
@@ -149,6 +149,7 @@ rule benchmark_pandas_compressed_csv:
     script: 'src/benchmark_pandas_csv.py'
 
 rule download_test_data:
+    output: expand(os.path.join(out_dir, 'datasets', '{dataset}.csv'), dataset=config['datasets'])
     run:
         import kaggle
         from zipfile import ZipFile
@@ -163,16 +164,20 @@ rule download_test_data:
             if os.path.exists(outfile):
                 continue
 
+            print("Downloading {}...".format(dataset))
+
             # download zipfile for specified dataset/filename
             kaggle.api.dataset_download_file(config['datasets'][dataset]['id'],
                                              config['datasets'][dataset]['file'],
                                              path='/tmp')
 
-            # unzip dataset
-            zip_file = os.path.join('/tmp', config['datasets'][dataset]['file'] + '.zip')
+            # if compressed, unzip dataset
+            csv_file = os.path.join('/tmp', config['datasets'][dataset]['file'])
+            zip_file = csv_file + '.zip'
 
-            with ZipFile(zip_file, 'r') as zobj:
-                zobj.extractall('/tmp')
+            if os.path.exists(zip_file):
+                with ZipFile(zip_file, 'r') as zobj:
+                    zobj.extractall('/tmp')
 
             # move to brenchmark data directory and rename
-            shutil.move(zip_file.replace('.zip', ''), outfile)
+            shutil.move(csv_file, outfile)
