@@ -33,7 +33,7 @@ rule combine_timings:
 
         dat = pd.concat(dfs)
 
-        dat.columns = ['Dataset', 'Language', 'Library', 'Method', 'Compression', 'Read Time (Secs)', 'Write Time (Secs)', 'File Size (MB)']
+        dat.columns = ['Dataset', 'Language', 'Library', 'Function', 'Compression', 'Read Time (Secs)', 'Write Time (Secs)', 'File Size (MB)']
         dat.to_csv(output[0], index=False)
 
 rule benchmark_parquet_pyarrow_lz4:

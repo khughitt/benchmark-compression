@@ -11,7 +11,7 @@ df = pd.read_csv(snakemake.input[0])
 
 # benchmark write performance
 num_times = int(snakemake.config['benchmark']['num_times'])
-write_times = timeit.repeat("df.to_csv('{}')".format(snakemake.output['data']), 
+write_times = timeit.repeat("df.to_csv('{}', index=False)".format(snakemake.output['data']), 
                             globals=globals(), number=1, repeat=num_times)
 
 # benchmark read performance

@@ -23,5 +23,5 @@ fsize = os.path.getsize(snakemake.output['data']) / 1e6
 
 with open(snakemake.output['timings'], 'w') as fp:
     entry = [snakemake.wildcards['dataset'], 
-            'python', 'feather', 'pandas.read_feather', 'none', str(min(read_times)), str(min(write_times)), str(fsize)]
+            'python', 'python-feather', 'pandas.read_feather', 'none', str(min(read_times)), str(min(write_times)), str(fsize)]
     fp.write(", ".join(entry) + "\n")

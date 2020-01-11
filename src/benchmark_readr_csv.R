@@ -15,7 +15,8 @@ min_read_time <- min(read_times$time) / 1e9
 df <- read_csv(snakemake@input[[1]], col_types = cols())
 
 write_times <- microbenchmark(
-  write_csv(df, snakemake@output[['data']]),
+  # exclude NA placeholders to be more consistent with pandas
+  write_csv(df, snakemake@output[['data']], na = ""),
   times = snakemake@config$benchmark$num_times
 )
 min_write_time <- min(write_times$time) / 1e9

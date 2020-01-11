@@ -26,7 +26,7 @@ min_read_time <- min(read_times$time) / 1e9
 fsize <- file.size(snakemake@output[['data']]) / 1e6
 
 # save timings and size info
-entry <- c(snakemake@wildcards[['dataset']], 'r', 'feather', 'feather::read_feather', 
+entry <- c(snakemake@wildcards[['dataset']], 'r', 'r-feather', 'feather::read_feather', 
            'none', min_read_time, min_write_time, fsize)
 
 entry <- paste0(entry, collapse = ', ')
