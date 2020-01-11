@@ -21,7 +21,8 @@ read_times = timeit.repeat("pd.read_feather('{}')".format(snakemake.output['data
 # get output file size
 fsize = os.path.getsize(snakemake.output['data']) / 1e6
 
+# pandas uses pyarrow internally to read/write feather files
 with open(snakemake.output['timings'], 'w') as fp:
     entry = [snakemake.wildcards['dataset'], 
-            'python', 'pandas', 'feather', 'none', str(min(read_times)), str(min(write_times)), str(fsize)]
+            'python', 'pyarrow', 'feather', 'none', str(min(read_times)), str(min(write_times)), str(fsize)]
     fp.write(", ".join(entry) + "\n")

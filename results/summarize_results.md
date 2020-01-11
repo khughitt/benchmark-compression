@@ -1,12 +1,12 @@
 R/Python Data Compression Benchmark Results Summary
 ================
-2020-01-09
+2020-01-11
 
 ``` r
 library(tidyverse)
 library(knitr)
 
-opts_chunk$set(fig.width = 5.626, fig.height = 4.25, dpi = 192)
+opts_chunk$set(fig.width = 5.625, fig.height = 5.625, dpi = 192)
 ```
 
 # Overview
@@ -14,20 +14,23 @@ opts_chunk$set(fig.width = 5.626, fig.height = 4.25, dpi = 192)
 ``` r
 res <- read_csv('/data/benchmark/compression/timings/all_timings.csv', col_types = cols())
 
-# drop the "Language" and "Method" columns for now since everything is just using pandas..
-res <- res %>%
-  select(-Language, -Method)
-
 # add a more useful "Method" column and reorder columns
 res <- res %>%
-  mutate(Method = sprintf("%s (%s)", Library, Compression)) %>%
-  select(Dataset, Method, everything()) %>%
-  select(-Library, -Compression)
+  mutate(Method = sprintf("%s / %s (%s)", Library, `File Format`, Compression)) %>%
+  select(Dataset, Method, everything())
 
+# convert "Method" field to a factor with the desired order
+method_levels <- res %>%
+  arrange(`File Format`, desc(Compression), Library) %>%
+  pull(Method) %>%
+  unique()
+
+res$Method <- factor(res$Method, levels = method_levels)
+  
 # finally, let's add a fields representing the average compression ratio, and the
 # compression ratio to average i/o ratio
 data_sizes <- res %>%
-  filter(Method == 'pandas (none)') %>%
+  filter(Library == 'pandas' & `File Format` == 'csv' & Compression == 'none') %>%
   select(dataset=Dataset, size=`File Size (MB)`)
 
 res$natural_size <- data_sizes$size[match(res$Dataset, data_sizes$dataset)]
@@ -36,48 +39,71 @@ res <- res %>%
   mutate(`Compression Ratio` = natural_size / `File Size (MB)`) %>%
   mutate(`Compression to I/O Ratio` = `Compression Ratio` / (0.5 * (`Read Time (Secs)` + `Write Time (Secs)`)))
 
-knitr::kable(res, digits = 2)
+res %>%
+  select(-Library, -Compression) %>%
+  kable(digits = 2)
 ```
 
-| Dataset   | Method             | Read Time (Secs) | Write Time (Secs) | File Size (MB) | natural\_size | Compression Ratio | Compression to I/O Ratio |
-| :-------- | :----------------- | ---------------: | ----------------: | -------------: | ------------: | ----------------: | -----------------------: |
-| itraq     | pandas (none)      |             0.12 |              1.13 |          14.23 |         14.23 |              1.00 |                     1.60 |
-| golub1999 | pandas (none)      |             0.04 |              0.31 |           2.07 |          2.07 |              1.00 |                     5.77 |
-| pancan    | pandas (none)      |             9.48 |             20.71 |         226.34 |        226.34 |              1.00 |                     0.07 |
-| yeast     | pandas (none)      |             0.08 |              0.71 |          10.10 |         10.10 |              1.00 |                     2.52 |
-| itraq     | pandas (gzip)      |             0.19 |              3.27 |           5.84 |         14.23 |              2.43 |                     1.41 |
-| golub1999 | pandas (gzip)      |             0.05 |              1.08 |           0.76 |          2.07 |              2.72 |                     4.79 |
-| pancan    | pandas (gzip)      |            10.52 |             39.12 |          76.82 |        226.34 |              2.95 |                     0.12 |
-| yeast     | pandas (gzip)      |             0.13 |              1.27 |           4.82 |         10.10 |              2.10 |                     2.99 |
-| itraq     | feather (none)     |             0.01 |              0.04 |           9.30 |         14.23 |              1.53 |                    67.60 |
-| golub1999 | feather (none)     |             0.01 |              0.01 |           3.96 |          2.07 |              0.52 |                    47.52 |
-| pancan    | feather (none)     |             0.22 |              1.42 |         133.13 |        226.34 |              1.70 |                     2.08 |
-| yeast     | feather (none)     |             0.00 |              0.01 |           4.54 |         10.10 |              2.22 |                   349.88 |
-| itraq     | pyarrow (lz4)      |             0.01 |              0.06 |           3.50 |         14.23 |              4.07 |                   113.56 |
-| golub1999 | pyarrow (lz4)      |             0.02 |              0.03 |           1.07 |          2.07 |              1.94 |                    82.04 |
-| pancan    | pyarrow (lz4)      |             2.17 |              2.62 |         145.48 |        226.34 |              1.56 |                     0.65 |
-| yeast     | pyarrow (lz4)      |             0.01 |              0.03 |           2.47 |         10.10 |              4.10 |                   206.91 |
-| itraq     | fastparquet (lz4)  |             0.06 |              0.09 |           5.31 |         14.23 |              2.68 |                    36.10 |
-| golub1999 | fastparquet (lz4)  |             0.03 |              0.09 |           1.53 |          2.07 |              1.35 |                    22.47 |
-| pancan    | fastparquet (lz4)  |             5.33 |              8.66 |         121.36 |        226.34 |              1.87 |                     0.27 |
-| yeast     | fastparquet (lz4)  |             0.02 |              0.05 |           3.01 |         10.10 |              3.36 |                    95.87 |
-| itraq     | pyarrow (snappy)   |             0.01 |              0.06 |           3.49 |         14.23 |              4.07 |                   115.28 |
-| golub1999 | pyarrow (snappy)   |             0.02 |              0.03 |           1.07 |          2.07 |              1.94 |                    82.39 |
-| pancan    | pyarrow (snappy)   |             2.26 |              2.64 |         145.09 |        226.34 |              1.56 |                     0.64 |
-| yeast     | pyarrow (snappy)   |             0.01 |              0.03 |           2.61 |         10.10 |              3.87 |                   202.20 |
-| itraq     | pyarrow (zstd)     |             0.01 |              0.06 |           3.30 |         14.23 |              4.31 |                   110.34 |
-| golub1999 | pyarrow (zstd)     |             0.02 |              0.03 |           0.85 |          2.07 |              2.45 |                    96.35 |
-| pancan    | pyarrow (zstd)     |             2.18 |              3.33 |         137.31 |        226.34 |              1.65 |                     0.60 |
-| yeast     | pyarrow (zstd)     |             0.01 |              0.04 |           2.34 |         10.10 |              4.32 |                   174.61 |
-| itraq     | fastparquet (zstd) |             0.06 |              0.11 |           3.29 |         14.23 |              4.32 |                    49.66 |
-| golub1999 | fastparquet (zstd) |             0.03 |              0.10 |           0.83 |          2.07 |              2.50 |                    36.87 |
-| pancan    | fastparquet (zstd) |             5.60 |              9.16 |         112.67 |        226.34 |              2.01 |                     0.27 |
-| yeast     | fastparquet (zstd) |             0.02 |              0.07 |           2.15 |         10.10 |              4.70 |                   105.27 |
+| Dataset   | Method                       | Language | File Format | Read Time (Secs) | Write Time (Secs) | File Size (MB) | natural\_size | Compression Ratio | Compression to I/O Ratio |
+| :-------- | :--------------------------- | :------- | :---------- | ---------------: | ----------------: | -------------: | ------------: | ----------------: | -----------------------: |
+| itraq     | pandas / csv (none)          | python   | csv         |             0.13 |              1.17 |          14.16 |         14.16 |              1.00 |                     1.54 |
+| golub1999 | pandas / csv (none)          | python   | csv         |             0.04 |              0.31 |           2.04 |          2.04 |              1.00 |                     5.72 |
+| pancan    | pandas / csv (none)          | python   | csv         |             9.43 |             20.22 |         226.34 |        226.34 |              1.00 |                     0.07 |
+| yeast     | pandas / csv (none)          | python   | csv         |             0.08 |              0.72 |          10.07 |         10.07 |              1.00 |                     2.51 |
+| itraq     | pandas / csv (gzip)          | python   | csv         |             0.19 |              3.28 |           5.81 |         14.16 |              2.44 |                     1.40 |
+| golub1999 | pandas / csv (gzip)          | python   | csv         |             0.05 |              1.11 |           0.74 |          2.04 |              2.74 |                     4.73 |
+| pancan    | pandas / csv (gzip)          | python   | csv         |            10.73 |             39.70 |          76.81 |        226.34 |              2.95 |                     0.12 |
+| yeast     | pandas / csv (gzip)          | python   | csv         |             0.13 |              1.29 |           4.80 |         10.07 |              2.10 |                     2.95 |
+| itraq     | pyarrow / feather (none)     | python   | feather     |             0.01 |              0.05 |           9.30 |         14.16 |              1.52 |                    57.76 |
+| golub1999 | pyarrow / feather (none)     | python   | feather     |             0.01 |              0.01 |           3.96 |          2.04 |              0.52 |                    43.78 |
+| pancan    | pyarrow / feather (none)     | python   | feather     |             0.21 |              1.44 |         133.13 |        226.34 |              1.70 |                     2.06 |
+| yeast     | pyarrow / feather (none)     | python   | feather     |             0.00 |              0.01 |           4.54 |         10.07 |              2.22 |                   331.29 |
+| itraq     | pyarrow / parquet (lz4)      | python   | parquet     |             0.02 |              0.06 |           3.50 |         14.16 |              4.05 |                   109.34 |
+| golub1999 | pyarrow / parquet (lz4)      | python   | parquet     |             0.02 |              0.03 |           1.07 |          2.04 |              1.91 |                    79.81 |
+| pancan    | pyarrow / parquet (lz4)      | python   | parquet     |             2.23 |              2.66 |         145.48 |        226.34 |              1.56 |                     0.64 |
+| yeast     | pyarrow / parquet (lz4)      | python   | parquet     |             0.01 |              0.03 |           2.47 |         10.07 |              4.09 |                   201.30 |
+| itraq     | fastparquet / parquet (lz4)  | python   | parquet     |             0.06 |              0.10 |           5.31 |         14.16 |              2.67 |                    35.23 |
+| golub1999 | fastparquet / parquet (lz4)  | python   | parquet     |             0.03 |              0.09 |           1.53 |          2.04 |              1.33 |                    21.62 |
+| pancan    | fastparquet / parquet (lz4)  | python   | parquet     |             6.01 |              8.68 |         121.36 |        226.34 |              1.87 |                     0.25 |
+| yeast     | fastparquet / parquet (lz4)  | python   | parquet     |             0.02 |              0.05 |           3.01 |         10.07 |              3.35 |                    96.44 |
+| itraq     | pyarrow / parquet (snappy)   | python   | parquet     |             0.02 |              0.06 |           3.49 |         14.16 |              4.06 |                   110.81 |
+| golub1999 | pyarrow / parquet (snappy)   | python   | parquet     |             0.02 |              0.03 |           1.07 |          2.04 |              1.91 |                    76.29 |
+| pancan    | pyarrow / parquet (snappy)   | python   | parquet     |             2.27 |              2.67 |         145.09 |        226.34 |              1.56 |                     0.63 |
+| yeast     | pyarrow / parquet (snappy)   | python   | parquet     |             0.01 |              0.03 |           2.61 |         10.07 |              3.86 |                   200.58 |
+| itraq     | pyarrow / parquet (zstd)     | python   | parquet     |             0.01 |              0.06 |           3.30 |         14.16 |              4.29 |                   109.02 |
+| golub1999 | pyarrow / parquet (zstd)     | python   | parquet     |             0.02 |              0.04 |           0.85 |          2.04 |              2.41 |                    93.23 |
+| pancan    | pyarrow / parquet (zstd)     | python   | parquet     |             2.23 |              3.34 |         137.31 |        226.34 |              1.65 |                     0.59 |
+| yeast     | pyarrow / parquet (zstd)     | python   | parquet     |             0.01 |              0.04 |           2.34 |         10.07 |              4.30 |                   173.31 |
+| itraq     | fastparquet / parquet (zstd) | python   | parquet     |             0.06 |              0.11 |           3.29 |         14.16 |              4.30 |                    48.51 |
+| golub1999 | fastparquet / parquet (zstd) | python   | parquet     |             0.03 |              0.10 |           0.83 |          2.04 |              2.45 |                    36.27 |
+| pancan    | fastparquet / parquet (zstd) | python   | parquet     |             5.81 |              9.43 |         112.67 |        226.34 |              2.01 |                     0.26 |
+| yeast     | fastparquet / parquet (zstd) | python   | parquet     |             0.02 |              0.07 |           2.15 |         10.07 |              4.69 |                    98.69 |
+| itraq     | readr / csv (none)           | r        | csv         |             0.57 |              0.20 |          12.42 |         14.16 |              1.14 |                     2.97 |
+| golub1999 | readr / csv (none)           | r        | csv         |             0.06 |              0.09 |           2.04 |          2.04 |              1.00 |                    13.40 |
+| pancan    | readr / csv (none)           | r        | csv         |            30.49 |              4.69 |         201.73 |        226.34 |              1.12 |                     0.06 |
+| yeast     | readr / csv (none)           | r        | csv         |             0.37 |              0.11 |          10.03 |         10.07 |              1.00 |                     4.16 |
+| itraq     | readr / csv (gzip)           | r        | csv         |             0.57 |              1.07 |           5.46 |         14.16 |              2.59 |                     3.16 |
+| golub1999 | readr / csv (gzip)           | r        | csv         |             0.06 |              0.26 |           0.76 |          2.04 |              2.69 |                    16.35 |
+| pancan    | readr / csv (gzip)           | r        | csv         |            30.28 |             15.51 |          72.07 |        226.34 |              3.14 |                     0.14 |
+| yeast     | readr / csv (gzip)           | r        | csv         |             0.37 |              0.68 |           4.79 |         10.07 |              2.10 |                     4.00 |
+| itraq     | r-feather / feather (none)   | r        | feather     |             0.01 |              0.01 |           9.30 |         14.16 |              1.52 |                   149.98 |
+| golub1999 | r-feather / feather (none)   | r        | feather     |             0.01 |              0.01 |           3.96 |          2.04 |              0.52 |                    64.67 |
+| pancan    | r-feather / feather (none)   | r        | feather     |             0.31 |              0.16 |         133.13 |        226.34 |              1.70 |                     7.27 |
+| yeast     | r-feather / feather (none)   | r        | feather     |             0.00 |              0.01 |           4.54 |         10.07 |              2.22 |                   448.41 |
+| itraq     | r-arrow / parquet (none)     | r        | parquet     |             0.01 |              0.05 |           3.93 |         14.16 |              3.60 |                   124.33 |
+| golub1999 | r-arrow / parquet (none)     | r        | parquet     |             0.01 |              0.03 |           1.55 |          2.04 |              1.32 |                    66.69 |
+| pancan    | r-arrow / parquet (none)     | r        | parquet     |             1.51 |              1.46 |         137.93 |        226.34 |              1.64 |                     1.10 |
+| yeast     | r-arrow / parquet (none)     | r        | parquet     |             0.00 |              0.03 |           2.72 |         10.07 |              3.70 |                   239.57 |
+
+``` r
+# include original dataset sizes in plot sub-headers
+res$Dataset <- sprintf("%s (%0.1f MB)", res$Dataset, res$natural_size)
+```
 
 # Read Time (seconds)
 
 ``` r
-ggplot(res, aes(x = Method, y = `Read Time (Secs)`, fill = Method)) +
+ggplot(res, aes(x = Method, y = `Read Time (Secs)`, fill = `File Format`)) +
   geom_bar(stat = 'identity') + 
   facet_wrap(~Dataset, scales = 'free_y') +
   theme_bw() +
@@ -91,7 +117,7 @@ ggplot(res, aes(x = Method, y = `Read Time (Secs)`, fill = Method)) +
 # Write Time (seconds)
 
 ``` r
-ggplot(res, aes(x = Method, y = `Write Time (Secs)`, fill = Method)) +
+ggplot(res, aes(x = Method, y = `Write Time (Secs)`, fill = `File Format`)) +
   geom_bar(stat = 'identity') + 
   facet_wrap(~Dataset, scales = 'free_y') +
   theme_bw() +
@@ -105,7 +131,7 @@ ggplot(res, aes(x = Method, y = `Write Time (Secs)`, fill = Method)) +
 # Filesize (MB)
 
 ``` r
-ggplot(res, aes(x = Method, y = `File Size (MB)`, fill = Method)) +
+ggplot(res, aes(x = Method, y = `File Size (MB)`, fill = `File Format`)) +
   geom_bar(stat = 'identity') + 
   facet_wrap(~Dataset, scales = 'free_y') +
   theme_bw() +
@@ -119,7 +145,7 @@ ggplot(res, aes(x = Method, y = `File Size (MB)`, fill = Method)) +
 # Compression to Average I/O Speed Ratio
 
 ``` r
-ggplot(res, aes(x = Method, y = `Compression to I/O Ratio`, fill = Method)) +
+ggplot(res, aes(x = Method, y = `Compression to I/O Ratio`, fill = `File Format`)) +
   geom_bar(stat = 'identity') + 
   facet_wrap(~Dataset, scales = 'free_y') +
   theme_bw() +

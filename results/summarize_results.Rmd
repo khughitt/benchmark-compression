@@ -8,7 +8,7 @@ output: github_document
 library(tidyverse)
 library(knitr)
 
-opts_chunk$set(fig.width = 5.626, fig.height = 4.25, dpi = 192)
+opts_chunk$set(fig.width = 5.625, fig.height = 5.625, dpi = 192)
 ```
 
 # Overview
@@ -18,13 +18,21 @@ res <- read_csv('/data/benchmark/compression/timings/all_timings.csv', col_types
 
 # add a more useful "Method" column and reorder columns
 res <- res %>%
-  mutate(Method = sprintf("%s / %s / %s", Library, `File Format`, Compression)) %>%
+  mutate(Method = sprintf("%s / %s (%s)", Library, `File Format`, Compression)) %>%
   select(Dataset, Method, everything())
+
+# convert "Method" field to a factor with the desired order
+method_levels <- res %>%
+  arrange(`File Format`, desc(Compression), Library) %>%
+  pull(Method) %>%
+  unique()
+
+res$Method <- factor(res$Method, levels = method_levels)
   
 # finally, let's add a fields representing the average compression ratio, and the
 # compression ratio to average i/o ratio
 data_sizes <- res %>%
-  filter(Method == 'pandas / csv / none') %>%
+  filter(Library == 'pandas' & `File Format` == 'csv' & Compression == 'none') %>%
   select(dataset=Dataset, size=`File Size (MB)`)
 
 res$natural_size <- data_sizes$size[match(res$Dataset, data_sizes$dataset)]
@@ -36,12 +44,15 @@ res <- res %>%
 res %>%
   select(-Library, -Compression) %>%
   kable(digits = 2)
+
+# include original dataset sizes in plot sub-headers
+res$Dataset <- sprintf("%s (%0.1f MB)", res$Dataset, res$natural_size)
 ```
 
 # Read Time (seconds)
 
 ```{r read_time}
-ggplot(res, aes(x = Method, y = `Read Time (Secs)`, fill = Library)) +
+ggplot(res, aes(x = Method, y = `Read Time (Secs)`, fill = `File Format`)) +
   geom_bar(stat = 'identity') + 
   facet_wrap(~Dataset, scales = 'free_y') +
   theme_bw() +
@@ -53,7 +64,7 @@ ggplot(res, aes(x = Method, y = `Read Time (Secs)`, fill = Library)) +
 # Write Time (seconds)
 
 ```{r write_time}
-ggplot(res, aes(x = Method, y = `Write Time (Secs)`, fill = Library)) +
+ggplot(res, aes(x = Method, y = `Write Time (Secs)`, fill = `File Format`)) +
   geom_bar(stat = 'identity') + 
   facet_wrap(~Dataset, scales = 'free_y') +
   theme_bw() +
@@ -65,7 +76,7 @@ ggplot(res, aes(x = Method, y = `Write Time (Secs)`, fill = Library)) +
 # Filesize (MB)
 
 ```{r file_size}
-ggplot(res, aes(x = Method, y = `File Size (MB)`, fill = Library)) +
+ggplot(res, aes(x = Method, y = `File Size (MB)`, fill = `File Format`)) +
   geom_bar(stat = 'identity') + 
   facet_wrap(~Dataset, scales = 'free_y') +
   theme_bw() +
@@ -77,7 +88,7 @@ ggplot(res, aes(x = Method, y = `File Size (MB)`, fill = Library)) +
 # Compression to Average I/O Speed Ratio
 
 ```{r compression_to_speed_ratio}
-ggplot(res, aes(x = Method, y = `Compression to I/O Ratio`, fill = Library)) +
+ggplot(res, aes(x = Method, y = `Compression to I/O Ratio`, fill = `File Format`)) +
   geom_bar(stat = 'identity') + 
   facet_wrap(~Dataset, scales = 'free_y') +
   theme_bw() +
