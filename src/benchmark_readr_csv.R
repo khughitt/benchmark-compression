@@ -31,7 +31,7 @@ if (endsWith(snakemake@output[[1]], '.gz')) {
 }
 
 # save timings and size info
-entry <- c(snakemake@wildcards[['dataset']], 'r', 'readr', 'read::read_csv', 
+entry <- c(snakemake@wildcards[['dataset']], 'r', 'readr', 'csv',
            compression, min_read_time, min_write_time, fsize)
 
 entry <- paste0(entry, collapse = ', ')

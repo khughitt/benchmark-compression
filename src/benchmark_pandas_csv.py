@@ -25,6 +25,6 @@ fsize = os.path.getsize(snakemake.output['data']) / 1e6
 compression = 'gzip' if snakemake.output[0].endswith('.gz') else 'none'
 
 with open(snakemake.output['timings'], 'w') as fp:
-    entry = [snakemake.wildcards['dataset'], 'python', 'pandas', 'pandas.read_csv', compression, 
+    entry = [snakemake.wildcards['dataset'], 'python', 'pandas', 'csv', compression, 
              str(min(read_times)), str(min(write_times)), str(fsize)]
     fp.write(", ".join(entry) + "\n")

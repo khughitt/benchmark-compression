@@ -18,13 +18,13 @@ res <- read_csv('/data/benchmark/compression/timings/all_timings.csv', col_types
 
 # add a more useful "Method" column and reorder columns
 res <- res %>%
-  mutate(Method = sprintf("%s (%s)", Library, Compression)) %>%
+  mutate(Method = sprintf("%s / %s / %s", Library, `File Format`, Compression)) %>%
   select(Dataset, Method, everything())
   
 # finally, let's add a fields representing the average compression ratio, and the
 # compression ratio to average i/o ratio
 data_sizes <- res %>%
-  filter(Method == 'pandas (none)') %>%
+  filter(Method == 'pandas / csv / none') %>%
   select(dataset=Dataset, size=`File Size (MB)`)
 
 res$natural_size <- data_sizes$size[match(res$Dataset, data_sizes$dataset)]
